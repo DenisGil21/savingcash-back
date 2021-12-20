@@ -1,5 +1,5 @@
 const { response } = require("express");
-const Usuario = require('../models');
+const Usuario = require('../models/usuario');
 const bcryptjs = require('bcryptjs');
 const { generarJWT } = require("../helpers/generar-jwt");
 
@@ -47,7 +47,25 @@ const login = async(req, res = response) => {
 
 }
 
+const renewToken = async(req, res = response) => {
+
+    const uid = req.uid;
+
+    //Generar el TOKEN -jwt
+    const token = await generarJWT(uid);
+
+    //Obtener usuario por uid
+    const usuario = await Usuario.findById(uid);
+
+    res.json({
+        ok: true,
+        token,
+        usuario,
+    });
+}
+
 
 module.exports = {
-    login
+    login,
+    renewToken
 }
