@@ -1,5 +1,5 @@
 const Usuario = require('../models/usuario');
-
+const Movimiento = require('../models/movimiento');
 
 const usernameExiste = async(username = '') => {
     const existeUsername = await Usuario.findOne({ username });
@@ -15,8 +15,16 @@ const existeUsuarioPorId = async(id = '') => {
     }
 }
 
+const existeMovimientoPorId = async(id='') => {
+    const existeMovimiento = await Movimiento.findById(id);
+    if (!existeMovimiento) {
+        throw new Error(`El id no existe: ${id}`);
+    } 
+}
+
 
 module.exports = {
     usernameExiste,
     existeUsuarioPorId,
+    existeMovimientoPorId
 }
