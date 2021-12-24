@@ -1,7 +1,7 @@
 const { response } = require("express");
 const Usuario = require('../models/usuario');
 const bcryptjs = require('bcryptjs');
-const { generarJWT } = require("../helpers/generar-jwt");
+const { generarJWT } = require('../helpers');
 
 const login = async(req, res = response) => {
 
@@ -13,20 +13,20 @@ const login = async(req, res = response) => {
         const usuario = await Usuario.findOne({ username });
         if (!usuario) {
             return res.status(400).json({
-                msj: 'Usuario / Password no son correctos - correo'
+                msj: 'Usuario / Password no son correctos'
             });
         }
         // Si el usuario está activo
         if (!usuario.activo) {
             return res.status(400).json({
-                msj: 'Usuario / Password no son correctos - activo: false'
+                msj: 'Usuario / Password no son correctos'
             });
         }
         // Verificar la contraseña
         const validPassword = bcryptjs.compareSync(password, usuario.password);
         if (!validPassword) {
             return res.status(400).json({
-                msj: 'Usuario / Password no son correctos - password'
+                msj: 'Usuario / Password no son correctos'
             });
         }
 
