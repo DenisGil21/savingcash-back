@@ -1,21 +1,75 @@
 const {response, request} = require('express');
+const { calcularDatosAhorro } = require('../helpers/function-validators');
 const Movimiento = require('../models/movimiento');
 
 const movimientosGet = async(req = request, res = response) => {
-    const {limite = 5, desde = 0} = req.query;
+    const {limite = 5, desde = 0, mes = null, anio = null} = req.query;
+
+    const query = {
+        activo:true, 
+    };
+
+    let filter = [{
+        $project: {
+           anio: { $year: "$fecha" },
+           mes: { $month: "$fecha" },
+        activo:1,
+        document: "$$ROOT"
+        }
+      },
+      {
+        $match: {
+        //   "anio": mes,
+        //   "mes": mes
+        activo : true
+        }
+      },
+      {
+        $replaceRoot: { "newRoot": "$document" }
+      }
+    ]
+    if (mes) {
+        filter[1].$match.mes = parseInt(mes);  
+
+    }
     
-    const query = {activo:true};
+    if (anio) {
+        filter[1].$match.anio = parseInt(anio);    
+    }
     
     const [total, movimientos] = await Promise.all([
         Movimiento.countDocuments(query),
-        Movimiento.find(query)
+        Movimiento.aggregate(filter)
         .skip(Number(desde))
         .limit(Number(limite))
     ]);
+
+    const dataDashboard = calcularDatosAhorro(movimientos);
     res.json({
-        total, movimientos
+        total,
+        ...dataDashboard, 
+        movimientos
     });
 } 
+
+const movimientosAniosGet = async(req, res = response) => {
+    const anios = await Movimiento.aggregate([
+        {
+            $project:{
+                anio: {$year: "$fecha"}
+            }
+        },
+        {
+            $group:{
+                _id: "$anio",
+            },
+        }
+    ]);
+
+    res.json({
+        anios
+    })
+}
 
 const movimientosPost = async(req, res = response) => {
     const {cantidad, tipo, concepto} = req.body;
@@ -74,5 +128,6 @@ module.exports = {
     movimientosGet,
     movimientosPost,
     movimientosPut,
-    movimientosDelete
+    movimientosDelete,
+    movimientosAniosGet
 }

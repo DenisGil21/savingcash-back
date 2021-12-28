@@ -1,6 +1,6 @@
 const { Router } = require('express');
 const { check } = require('express-validator');
-const { movimientosGet, movimientosPost, movimientosPut, movimientosDelete} = require('../controllers/movimientos');
+const { movimientosGet, movimientosPost, movimientosPut, movimientosDelete, movimientosAniosGet} = require('../controllers/movimientos');
 const { validarJWT, validarCampos } = require('../middlewares');
 const { existeMovimientoPorId } = require('../helpers');
 
@@ -9,6 +9,10 @@ const router = Router();
 router.get('/', [
     validarJWT,
 ], movimientosGet);
+
+router.get('/anios', [
+    validarJWT,
+], movimientosAniosGet);
 
 router.post('/', [
     validarJWT,
